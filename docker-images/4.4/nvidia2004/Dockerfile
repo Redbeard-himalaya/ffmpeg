@@ -65,6 +65,7 @@ ENV         FFMPEG_VERSION=4.4 \
             LIBARIBB24_VERSION=1.0.3 \
             LIBPNG_VERSION=1.6.9 \
             LIBVMAF_VERSION=2.1.1 \
+            LIBZIMG_VERSION=3.0.1 \
             SRC=/usr/local
 
 ARG         FREETYPE_SHA256SUM="5eab795ebb23ac77001cfb68b7d4d50b5d6c7469247b0b01b2c953269f658dac freetype-2.10.4.tar.gz"
@@ -81,6 +82,7 @@ ARG         LIBBLURAY_SHA256SUM="a3dd452239b100dc9da0d01b30e1692693e2a332a7d2991
 ARG         LIBZMQ_SHA256SUM="02ecc88466ae38cf2c8d79f09cfd2675ba299a439680b64ade733e26a349edeb v4.3.2.tar.gz"
 ARG         LIBARIBB24_SHA256SUM="f61560738926e57f9173510389634d8c06cabedfa857db4b28fb7704707ff128 v1.0.3.tar.gz"
 ARG         LIBVMAF_SHA256SUM="e7fc00ae1322a7eccfcf6d4f1cdf9c67eec8058709887c8c6c3795c617326f77 v2.1.1.tar.gz"
+ARG         LIBZIMG_SHA256SUM="c50a0922f4adac4efad77427d13520ed89b8366eef0ef2fa379572951afcc73f release-3.0.1.tar.gz"
 
 
 ARG         LD_LIBRARY_PATH=/opt/ffmpeg/lib
@@ -530,6 +532,20 @@ RUN \
         make install && \
         rm -rf ${DIR}
 
+## libzimg
+RUN \
+        DIR=/tmp/zimg && \
+        mkdir -p ${DIR} && \
+        cd ${DIR} && \
+        curl -sLO https://github.com/sekrit-twc/zimg/archive/release-${LIBZIMG_VERSION}.tar.gz && \
+        echo ${LIBZIMG_SHA256SUM} | sha256sum --check && \
+        tar -xz --strip-components=1 -f release-${LIBZIMG_VERSION}.tar.gz && \
+        ./autogen.sh && \
+        ./configure --prefix="${PREFIX}" --enable-static && \
+        make && \
+        make install && \
+        rm -rf ${DIR}
+
 ## ffmpeg https://ffmpeg.org/
 RUN  \
         DIR=/tmp/ffmpeg && mkdir -p ${DIR} && cd ${DIR} && \
@@ -541,6 +557,7 @@ RUN  \
 RUN \
         DIR=/tmp/ffmpeg && mkdir -p ${DIR} && cd ${DIR} && \
         ./configure \
+        --pkg-config-flags="--static" \
         --disable-debug \
         --disable-doc \
         --disable-ffplay \
@@ -563,6 +580,7 @@ RUN \
         --enable-libx265 \
         --enable-libxvid \
         --enable-libx264 \
+        --enable-libzimg \
         --enable-nonfree \
         --enable-openssl \
         --enable-libfdk_aac \
