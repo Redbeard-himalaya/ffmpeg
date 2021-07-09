@@ -601,6 +601,7 @@ RUN \
         --enable-cuda \
         --enable-cuvid \
         --enable-libnpp \
+        --enable-opencl \
         --extra-cflags="-I${PREFIX}/include -I${PREFIX}/include/ffnvcodec -I/usr/local/cuda/include/" \
         --extra-ldflags="-L${PREFIX}/lib -L/usr/local/cuda/lib64 -L/usr/local/cuda/lib32/" && \
         make && \
@@ -630,6 +631,9 @@ FROM        runtime-base AS release
 MAINTAINER  Julien Rottenberg <julien@rottenberg.info>
 
 ENV         LD_LIBRARY_PATH=/usr/local/lib:/usr/local/lib64
+
+# install libOpenCL
+RUN         apt install -y nvidia-opencl-dev
 
 CMD         ["--help"]
 ENTRYPOINT  ["ffmpeg"]
